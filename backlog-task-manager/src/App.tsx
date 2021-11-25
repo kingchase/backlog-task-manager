@@ -1,12 +1,13 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Login from './components/Login/Login';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        {/* <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
@@ -17,8 +18,8 @@ function App() {
           rel="noopener noreferrer"
         >
           Learn React
-        </a>
-        <script src="https://apis.google.com/js/platform.js" async defer></script>
+        </a> */}
+        <Login/>
       </header>
     </div>
   );
