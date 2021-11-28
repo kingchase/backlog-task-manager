@@ -1,16 +1,29 @@
 {
     "compilerOptions": {
       "module": "commonjs",
-      "esModuleInterop": true,
-      "target": "es6",
-      "noImplicitAny": true,
       "moduleResolution": "node",
       "sourceMap": true,
       "outDir": "dist",
       "baseUrl": ".",
       "paths": {
         "*": ["node_modules/*"]
-      }
+      },
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "allowJs": true,
+      "esModuleInterop": true,
+      "target": "ES2019",
+      "noImplicitAny": false,
+      "removeComments": true,
+      "preserveConstEnums": true,
+      "resolveJsonModule": true,
+      "skipLibCheck": true,
+      "allowSyntheticDefaultImports": true,
+      "strict": true,
+      "forceConsistentCasingInFileNames": true,
+      "isolatedModules": true,
+      "jsx": "react",
+      "strictPropertyInitialization": false
     },
     "include": ["src/**/*"]
   }
