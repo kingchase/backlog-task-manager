@@ -12,6 +12,18 @@ export default function Login() {
         console.log('[Login Failed] res:', res)
     }
 
+    const handleLogin = async (googleData:any) => {
+        const res = await fetch("/api/v1/auth/google", {
+            method: "POST",
+            body: JSON.stringify({
+                token: googleData.tokenId
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        const data = await res.json();
+    }
     // NEEDS MORE LOGIC
 
     return (
@@ -19,7 +31,7 @@ export default function Login() {
             <GoogleLogin
                 clientId={clientId}
                 buttonText='Sign in with Google'
-                onSuccess={onSuccess}
+                onSuccess={handleLogin}
                 onFailure={onFailure}
                 cookiePolicy={'single_host_origin'}
                 style={{marginTop: '100px'}}

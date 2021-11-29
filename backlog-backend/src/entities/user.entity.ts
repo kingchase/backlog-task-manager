@@ -3,15 +3,12 @@ import { Task } from "./task.entity";
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
-    user_id: number;
+    @PrimaryColumn()
+    user_id: string;
 
     @Column()
     email_address: string;
 
     @OneToMany(() => Task, task => task.user)
     tasks: Task[];
-
-    @Column({nullable: false})
-    external_id: number;
 }
