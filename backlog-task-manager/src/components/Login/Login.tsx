@@ -13,7 +13,7 @@ export default function Login() {
     }
 
     const handleLogin = async (googleData:any) => {
-        const res = await fetch("/api/v1/auth/google", {
+        const res = await fetch("http://localhost:9000/api/v1/auth/google", {
             method: "POST",
             body: JSON.stringify({
                 token: googleData.tokenId

@@ -6,9 +6,12 @@ import cors from 'cors'
 import logger from 'morgan'
 import bodyParser from 'body-parser'
 import {OAuth2Client} from 'google-auth-library'
+import dotenv from 'dotenv'
 
 createConnection().then(connection => {
     const userRepository = connection.getRepository(User);
+
+    dotenv.config() // reads .env file into process.env
 
     const app = express()
     const port = 9000
@@ -17,25 +20,25 @@ createConnection().then(connection => {
     const client = new OAuth2Client(process.env.CLIENT_ID);
 
     // middleware
-    app.use(cors);
+    // app.use(cors);
     app.use(logger('dev'));
     app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
 
-    //allow origins
-    // const allowedOrigins = ['http://localhost:3000']
+    // allow origins
+    const allowedOrigins = [process.env.FRONTEND_URL||'']
 
-    // const options: cors.CorsOptions = {
-    //     origin: allowedOrigins
-    // };
-    // app.use(cors(options))
+    const options: cors.CorsOptions = {
+        origin: allowedOrigins
+    };
+    app.use(cors(options))
 
 
     // requests
     app.post("/api/v1/auth/google", async (req: Request, res: Response) => {
         const {token} = req.body;
 
-        const ticket = await client.verifyIdToken({
+        await client.verifyIdToken({
             idToken: token,
             audience: process.env.CLIENT_ID
         }).then(async (ticket) => {
