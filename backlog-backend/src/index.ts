@@ -7,9 +7,12 @@ import logger from 'morgan'
 import bodyParser from 'body-parser'
 import {OAuth2Client} from 'google-auth-library'
 import dotenv from 'dotenv'
+import cookieParser from 'cookie-parser'
+import { Task } from './entities/task.entity'
 
 createConnection().then(connection => {
     const userRepository = connection.getRepository(User);
+    const taskRepository = connection.getRepository(Task);
 
     dotenv.config() // reads .env file into process.env
 
@@ -24,6 +27,7 @@ createConnection().then(connection => {
     app.use(logger('dev'));
     app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
+    app.use(cookieParser(process.env.COOKIE_PARSER_SECRET));
 
     // allow origins
     const allowedOrigins = [process.env.FRONTEND_URL||'']
@@ -61,6 +65,12 @@ createConnection().then(connection => {
 
                 }
             }
+            const options = {
+                httpOnly: true,
+                signed: true
+            }
+            const id = ticket.getUserId()||"-1";
+            res.cookie('id', id, options)
             
         })
     })
@@ -69,9 +79,13 @@ createConnection().then(connection => {
         res.status(200).send()
     })
     
-    app.get("/tasks/:user", async function(req: Request, res: Response) {
-        const results = await userRepository.findOne(req.params.id);
-        return res.send(results);
+    app.get("/tasks", async function(req: Request, res: Response) {
+        const tasks = taskRepository
+            .createQueryBuilder("task")
+            .leftJoinAndSelect("task.user", "user")
+            .where("user_id = :id", {id: req.signedCookies.id})
+            .getMany();
+        res.send(tasks);
     })
 
     // app.post("/users/:id", async function(req: Request, res: Response) {
