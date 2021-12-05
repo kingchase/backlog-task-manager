@@ -13,7 +13,7 @@ export default function Login() {
     }
 
     const handleLogin = async (googleData:any) => {
-        const res = await fetch("http://localhost:9000/api/v1/auth/google", {
+        const res = await fetch(process.env.BACKEND_URL + "/api/v1/auth/google", {
             method: "POST",
             body: JSON.stringify({
                 token: googleData.tokenId
@@ -24,7 +24,7 @@ export default function Login() {
         })
         const data = await res.json();
     }
-    // NEEDS MORE LOGIC
+    // TODO: deal with token expiration and renewal
 
     return (
         <div>
