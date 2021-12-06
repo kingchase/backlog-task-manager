@@ -23,15 +23,19 @@ export default function Login() {
     }
 
     const handleLogin = async (googleData:any) => {
-        
+        var headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('Accept', 'application/json');  
+        headers.append('Access-Control-Allow-Credentials', 'true');
         const res = await fetch(url + "/api/v1/auth/google", {
             method: "POST",
+            headers: headers,
+            redirect: 'follow',
+            credentials: 'include',
             body: JSON.stringify({
                 token: googleData.tokenId
             }),
-            headers: {
-                "Content-Type": "application/json"
-            }
+            
         })
         const data = await res.json();
     }

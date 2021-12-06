@@ -34,10 +34,9 @@ function cat_separate (cat: string) {
     return ret;
 }
 
-let inputs:string[] = ["","","",""];
-
 export function TaskTable(){
     const curTable = useAppSelector((state) => state.taskTable.tasks);
+    let inputs:string[] = ["","","",""];
     const tableInputs = selectTableInput;
     const dispatch = useDispatch()
     const inputChange = (id: string, index: number) => {
@@ -47,8 +46,14 @@ export function TaskTable(){
         <Container>
             <div className="d-grid gap-2">
                 <Button variant="primary" size="lg" onClick= {async () => {
+                    var headers = new Headers();
+                    headers.append('Content-Type', 'application/json');
+                    headers.append('Accept', 'application/json');  
                     const res = await fetch(url + "/tasks/add-task", {
                         method: "POST",
+                        headers: headers,
+                        redirect: 'follow',
+                        credentials: 'include',
                         body: JSON.stringify({
                             task_name: inputs[0],
                             time_estimate: inputs[1],

@@ -32,10 +32,11 @@ createConnection().then(connection => {
     app.use(cookieParser(process.env.COOKIE_PARSER_SECRET));
 
     // allow origins
-    const allowedOrigins = [process.env.FRONTEND_URL||'']
+    const allowedOrigins = [process.env.FRONTEND_URL||'http://localhost:3000']
 
     const options: cors.CorsOptions = {
-        origin: allowedOrigins
+        origin: allowedOrigins,
+        credentials: true
     };
     app.use(cors(options))
 
@@ -72,14 +73,17 @@ createConnection().then(connection => {
                 signed: true
             }
             const id = ticket.getUserId()||"-1";
-            res.cookie('id', id, options);
+            res.cookie('backlog_id', id, options);
+            res.status(200).send();
             
+        }).catch((e) => {
+            res.status(500).json({'error': e});
         })
     })
 
     app.post("/tasks/add-task", async function (req: Request, res: Response) {
         try {
-            const user = await userRepository.findOneOrFail({where: {user_id: req.signedCookies.id}});
+            const user = await userRepository.findOneOrFail({where: {user_id: req.signedCookies.backlog_id}});
             let categories:Category[] = [];
             req.body.categories.forEach(async element => {
                 const cat = await categoryRepository.findOne({where: {category_name: element}});
@@ -116,7 +120,7 @@ createConnection().then(connection => {
         const tasks = taskRepository
             .createQueryBuilder("task")
             .leftJoinAndSelect("task.user", "user")
-            .where("user_id = :id", {id: req.signedCookies.id})
+            .where("user_id = :id", {id: req.signedCookies.backlog_id})
             .getMany();
         res.send(tasks);
     })
