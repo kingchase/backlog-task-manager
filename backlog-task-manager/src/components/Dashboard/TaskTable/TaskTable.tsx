@@ -39,8 +39,10 @@ export function TaskTable(){
     let inputs:string[] = ["","","",""];
     const tableInputs = selectTableInput;
     const dispatch = useDispatch()
-    const inputChange = (id: string, index: number) => {
-        let val = document.getElementById(id)!.nodeValue; let str; if (val) {str = val;} else {str = ""} inputs[index] = str;
+    const inputChange = (event: any, index: number) => {
+        const val = event.target.value;
+        const str = val||"";
+        inputs[index] = str;
     }
     return (
         <Container>
@@ -78,16 +80,16 @@ export function TaskTable(){
                 <tbody>
                     <tr>
                         <td><input id="i_task_name" name="task_name" type="text" onChange= {
-                            (state) => {inputChange("i_task_name", 0)}
+                            e => {inputChange(e, 0)}
                         }/></td>
                         <td><input id="i_time_estimate" name="time_estimate" type="text" onChange= {
-                            (state) => {inputChange("i_time_estimate", 1)}
+                            e => {inputChange(e, 1)}
                         }/></td>
-                        <td><input id="i_categories" name="categories" type="text" onChange= {
-                            (state) => {inputChange("i_categories", 2)}
+                        <td><input id="e" name="categories" type="text" onChange= {
+                            e => {inputChange(e, 2)}
                         }/></td>
                         <td><input id="i_expiration" name="expiration" type="text" onChange= {
-                            (state) => {inputChange("i_expiration", 3); }
+                            e => {inputChange(e, 3); }
                         }/></td>
                     </tr>
                     {curTable.map((item:taskState, idx: number) => (
