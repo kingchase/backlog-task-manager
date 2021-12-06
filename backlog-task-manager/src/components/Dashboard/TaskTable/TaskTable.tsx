@@ -9,6 +9,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '../../../App.css'
 import { selectTableInput, updateByIndex } from "./tableInputSlice";
 import { bindActionCreators } from "redux";
+import { ESRCH } from "constants";
 
 let url:string;
         if (process.env.BACKEND_URL) {
@@ -51,7 +52,7 @@ export function TaskTable(){
                     var headers = new Headers();
                     headers.append('Content-Type', 'application/json');
                     headers.append('Accept', 'application/json');  
-                    const res = await fetch(url + "/tasks/add-task", {
+                    await fetch(url + "/tasks/add-task", {
                         method: "POST",
                         headers: headers,
                         redirect: 'follow',
@@ -62,6 +63,16 @@ export function TaskTable(){
                             categories: cat_separate(inputs[2]),
                             expiration_date: inputs[3]
                         })
+                    }).then(async(res) => {
+                        const id = await res.text();
+                        const new_task:taskState = {
+                            task_id: parseInt(id),
+                            task_name: inputs[0],
+                            time_estimate: parseInt(inputs[1]),
+                            categories: cat_separate(inputs[2]),
+                            expiration_date: new Date(parseInt(inputs[3]))
+                        }
+                        dispatch(createRow(new_task));
                     })
                 }}>
                     Submit New Task
@@ -97,7 +108,7 @@ export function TaskTable(){
                             <td className="text-center">{curTable[idx].task_name}</td>
                             <td className="text-center">{curTable[idx].time_estimate}</td>
                             <td className="text-center">{curTable[idx].categories}</td>
-                            <td className="text-center">{curTable[idx].expiration_date.getUTCDate()}</td>
+                            <td className="text-center">{curTable[idx].expiration_date.getDate()}</td>
                         </tr>
                     ))}
                 </tbody>

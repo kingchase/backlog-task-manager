@@ -4,7 +4,7 @@ import { createConnection } from 'typeorm'
 import { User } from './entities/user.entity'
 import cors from 'cors'
 import logger from 'morgan'
-import bodyParser from 'body-parser'
+import bodyParser, { json } from 'body-parser'
 import {OAuth2Client} from 'google-auth-library'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
@@ -85,7 +85,7 @@ createConnection().then(connection => {
         try {
             const user = await userRepository.findOneOrFail({where: {user_id: req.signedCookies.backlog_id}});
             let categories:Category[] = [];
-            req.body.categories.forEach(async element => {
+            await req.body.categories.forEach(async (element:string) => {
                 const cat = await categoryRepository.findOne({where: {category_name: element}});
                 if (cat) {
                     categories.push(cat);
@@ -96,14 +96,14 @@ createConnection().then(connection => {
                     categories.push(mycat);
                 }
             });
-            let task = new Task();
+            let task = taskRepository.create();
             task.user = user;
             task.task_name = req.body.task_name;
             task.categories = categories;
             task.time_estimate = req.body.time_estimate;
             task.expiration_date = new Date(req.body.expiration_date);
             await taskRepository.save(task);
-            res.status(200).send();
+            res.send(task.task_id);
 
         } catch (e) {
             console.log(e);
@@ -116,13 +116,14 @@ createConnection().then(connection => {
         res.status(200).send()
     })
     
-    app.get("/tasks", async function(req: Request, res: Response) {
-        const tasks = taskRepository
+    app.get("/tasks/get-tasks", async function(req: Request, res: Response) {
+        const tasks = await taskRepository
             .createQueryBuilder("task")
             .leftJoinAndSelect("task.user", "user")
+            .leftJoinAndSelect("task.categories", "category")
             .where("user_id = :id", {id: req.signedCookies.backlog_id})
             .getMany();
-        res.send(tasks);
+        res.send(JSON.stringify({"tasks": tasks}));
     })
 
     // app.post("/users/:id", async function(req: Request, res: Response) {

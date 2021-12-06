@@ -13,7 +13,7 @@ export class Task {
     @Column({nullable: false})
     task_name: string;
 
-    @ManyToMany(() => Category)
+    @ManyToMany(() => Category, category => category.tasks)
     @JoinTable()
     categories: Category[];
 
