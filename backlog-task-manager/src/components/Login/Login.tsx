@@ -1,7 +1,17 @@
 import React from "react";
 import { GoogleLogin } from 'react-google-login'
+import dotenv from 'dotenv'
 
 const clientId = '214020505514-s9af0de9brcqal7edqstfidt61sgo9gk.apps.googleusercontent.com'
+
+dotenv.config({path: '../../.env'});
+
+let url:string;
+        if (process.env.BACKEND_URL) {
+            url = process.env.BACKEND_URL;
+        } else {
+            url = "http://localhost:9000"
+        }
 
 export default function Login() {
     const onSuccess = (res:any) => {
@@ -13,7 +23,8 @@ export default function Login() {
     }
 
     const handleLogin = async (googleData:any) => {
-        const res = await fetch(process.env.BACKEND_URL + "/api/v1/auth/google", {
+        
+        const res = await fetch(url + "/api/v1/auth/google", {
             method: "POST",
             body: JSON.stringify({
                 token: googleData.tokenId

@@ -9,10 +9,12 @@ import {OAuth2Client} from 'google-auth-library'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 import { Task } from './entities/task.entity'
+import { Category } from './entities/category.entity'
 
 createConnection().then(connection => {
     const userRepository = connection.getRepository(User);
     const taskRepository = connection.getRepository(Task);
+    const categoryRepository = connection.getRepository(Category);
 
     dotenv.config() // reads .env file into process.env
 
@@ -70,9 +72,40 @@ createConnection().then(connection => {
                 signed: true
             }
             const id = ticket.getUserId()||"-1";
-            res.cookie('id', id, options)
+            res.cookie('id', id, options);
             
         })
+    })
+
+    app.post("/tasks/add-task", async function (req: Request, res: Response) {
+        try {
+            const user = await userRepository.findOneOrFail({where: {user_id: req.signedCookies.id}});
+            let categories:Category[] = [];
+            req.body.categories.forEach(async element => {
+                const cat = await categoryRepository.findOne({where: {category_name: element}});
+                if (cat) {
+                    categories.push(cat);
+                } else {
+                    let mycat = categoryRepository.create();
+                    mycat.category_name = element;
+                    await categoryRepository.save(mycat);
+                    categories.push(mycat);
+                }
+            });
+            let task = new Task();
+            task.user = user;
+            task.task_name = req.body.task_name;
+            task.categories = categories;
+            task.time_estimate = req.body.time_estimate;
+            task.expiration_date = new Date(req.body.expiration_date);
+            await taskRepository.save(task);
+            res.status(200).send();
+
+        } catch (e) {
+            console.log(e);
+            console.log(req.signedCookies)
+            res.status(500).send();
+        }
     })
 
     app.get('/', (_, res) => {
