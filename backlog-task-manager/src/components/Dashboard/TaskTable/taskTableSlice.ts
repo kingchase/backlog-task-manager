@@ -21,10 +21,25 @@ export const taskTableSlice = createSlice({
             if (action.payload > -1 && action.payload < state.tasks.length) {
                 state.tasks.splice(action.payload, 1);
             }
+        },
+        clearTable: (state) => {
+            state.tasks = [];
+        },
+        sortTableAZ: (state) => {
+            state.tasks.sort((a, b) => (a.task_name > b.task_name)?1:-1);
+        },
+        sortTableGreaterTime: (state) => {
+            state.tasks.sort((a, b) => (a.time_estimate > b.time_estimate)?1:-1);
+        },
+        sortTableLessTime: (state) => {
+            state.tasks.sort((a, b) => (a.time_estimate < b.time_estimate)?1:-1);
+        },
+        sortTableExpiringSoonest: (state) => {
+            state.tasks.sort((a,b) => (a.expiration_date > b.expiration_date)?1:-1);
         }
     }
 })
 
-export const { createRow, removeRow } = taskTableSlice.actions;
+export const { createRow, removeRow, clearTable, sortTableAZ, sortTableExpiringSoonest, sortTableGreaterTime, sortTableLessTime } = taskTableSlice.actions;
 export const selectTask = (state: RootState) => state.taskTable;
 export default taskTableSlice.reducer;

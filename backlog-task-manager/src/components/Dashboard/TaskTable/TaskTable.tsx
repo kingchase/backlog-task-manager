@@ -1,9 +1,9 @@
 import React from "react";
-import { Container, Table, Button } from "react-bootstrap";
+import { Container, Table, Button, ButtonGroup } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../../redux/hooks";
 import { taskState } from "../taskSlice";
-import { createRow } from "./taskTableSlice";
+import { createRow, sortTableAZ, sortTableExpiringSoonest, sortTableGreaterTime, sortTableLessTime } from "./taskTableSlice";
 import {useForm} from 'react-hook-form'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../../../App.css'
@@ -47,7 +47,26 @@ export function TaskTable(){
     }
     return (
         <Container>
+            <div>
+                <ButtonGroup>
+                    <Button onClick={(state) => {dispatch(sortTableAZ())}}>
+                        Sort A-Z
+                    </Button>
+                    <Button onClick={(state) => {dispatch(sortTableGreaterTime())}}>
+                        Time Estimate ↑
+                    </Button>
+                    <Button onClick={(state) => {dispatch(sortTableLessTime())}}>
+                        Time Estimate ↓
+                    </Button>
+                    <Button onClick={(state) => {dispatch(sortTableExpiringSoonest())}}>
+                        Expiring Soon
+                    </Button>
+                </ButtonGroup>
+            </div>
             <div className="d-grid gap-2">
+                <ButtonGroup>
+
+                </ButtonGroup>
                 <Button variant="primary" size="lg" onClick= {async () => {
                     var headers = new Headers();
                     headers.append('Content-Type', 'application/json');
@@ -108,7 +127,7 @@ export function TaskTable(){
                             <td className="text-center">{curTable[idx].task_name}</td>
                             <td className="text-center">{curTable[idx].time_estimate}</td>
                             <td className="text-center">{curTable[idx].categories}</td>
-                            <td className="text-center">{curTable[idx].expiration_date.getDate()}</td>
+                            <td className="text-center">{curTable[idx].expiration_date.toString()}</td>
                         </tr>
                     ))}
                 </tbody>
