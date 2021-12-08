@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Table, Button, ButtonGroup } from "react-bootstrap";
+import { Container, Table, Button, ButtonGroup, DropdownButton } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../../redux/hooks";
 import { taskState } from "../taskSlice";
@@ -10,6 +10,7 @@ import '../../../App.css'
 import { selectTableInput, updateByIndex } from "./tableInputSlice";
 import { bindActionCreators } from "redux";
 import { ESRCH } from "constants";
+import DropdownItem from "@restart/ui/esm/DropdownItem";
 
 let url:string;
         if (process.env.BACKEND_URL) {
@@ -64,6 +65,11 @@ export function TaskTable(){
                     <Button onClick={(state) => {dispatch(sortTableExpiringSoonest())}}>
                         Expiring Soon
                     </Button>
+                    {/* <DropdownButton id="category-select" title="Category">
+                        <DropdownItem>
+
+                        </DropdownItem>
+                    </DropdownButton> */}
                 </ButtonGroup>
             </div>
             <Table bordered hover responsive variant="dark">
