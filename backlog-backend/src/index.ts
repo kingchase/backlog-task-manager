@@ -84,25 +84,35 @@ createConnection().then(connection => {
     app.post("/tasks/add-task", async function (req: Request, res: Response) {
         try {
             const user = await userRepository.findOneOrFail({where: {user_id: req.signedCookies.backlog_id}});
+            let cat = await categoryRepository.findOne({where: {category_name: req.body.category}});
+            if (!cat) {
+                cat = categoryRepository.create();
+                cat.category_name = req.body.category;
+                categoryRepository.save(cat);
+            }
             let categories:Category[] = [];
-            await req.body.categories.forEach(async (element:string) => {
-                const cat = await categoryRepository.findOne({where: {category_name: element}});
-                if (cat) {
-                    categories.push(cat);
-                } else {
-                    let mycat = categoryRepository.create();
-                    mycat.category_name = element;
-                    await categoryRepository.save(mycat);
-                    categories.push(mycat);
-                }
-            });
-            let task = taskRepository.create();
+            // await req.body.categories.forEach(async (element:string) => {
+            //     const cat = await categoryRepository.findOne({where: {category_name: element}});
+            //     if (cat) {
+            //         categories.push(cat);
+            //     } else {
+            //         let mycat = categoryRepository.create();
+            //         mycat.category_name = element;
+            //         await categoryRepository.save(mycat);
+            //         categories.push(mycat);
+            //     }
+            // });
+            const task = taskRepository.create();
             task.user = user;
             task.task_name = req.body.task_name;
-            task.categories = categories;
+            task.setCategory(cat);
+            // categories.forEach(async element => {
+            //     element.tasks.push(task);
+            //     await categoryRepository.save(element);
+            // });
             task.time_estimate = req.body.time_estimate;
             task.expiration_date = new Date(req.body.expiration_date);
-            await taskRepository.save(task);
+            await connection.manager.save(task);
             res.send(task.task_id);
 
         } catch (e) {
@@ -112,17 +122,42 @@ createConnection().then(connection => {
         }
     })
 
+    app.post("/tasks/remove-task", async function (req:Request, res: Response) {
+        try {
+            const task = await taskRepository
+            .createQueryBuilder("task")
+            .leftJoinAndSelect("task.user", "user")
+            .where("user_id = :id", {id: req.signedCookies.backlog_id})
+            .where("task_id = :t_id", {t_id: req.body.task_id})
+            .getOneOrFail();
+
+            taskRepository.remove(task);
+            res.status(200).send();
+        } catch (e) {
+            console.log(e);
+            res.status(500).send();
+        }
+    })
+
     app.get('/', (_, res) => {
         res.status(200).send()
     })
     
     app.get("/tasks/get-tasks", async function(req: Request, res: Response) {
-        const tasks = await taskRepository
-            .createQueryBuilder("task")
-            .leftJoinAndSelect("task.user", "user")
-            .leftJoinAndSelect("task.categories", "category")
-            .where("user_id = :id", {id: req.signedCookies.backlog_id})
-            .getMany();
+        // const tasks = await taskRepository
+        //     .createQueryBuilder("task")
+        //     .leftJoinAndSelect("task.user", "user")
+        //     .where("user_id = :id", {id: req.signedCookies.backlog_id})
+        //     .getMany();
+        const tasks = await taskRepository.find({
+            join: {alias: "task",
+                leftJoinAndSelect: {
+                    user: "task.user",
+                    category: "task.category"
+                },
+            },
+            where: {user: req.signedCookies.backlog_id}
+        })
         res.send(JSON.stringify({"tasks": tasks}));
     })
 

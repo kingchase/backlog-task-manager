@@ -3,7 +3,7 @@ import { Container, Table, Button, ButtonGroup } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../../redux/hooks";
 import { taskState } from "../taskSlice";
-import { createRow, sortTableAZ, sortTableExpiringSoonest, sortTableGreaterTime, sortTableLessTime } from "./taskTableSlice";
+import { createRow, removeRow, sortTableAZ, sortTableExpiringSoonest, sortTableGreaterTime, sortTableLessTime } from "./taskTableSlice";
 import {useForm} from 'react-hook-form'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../../../App.css'
@@ -18,27 +18,30 @@ let url:string;
             url = "http://localhost:9000"
         }
 
-function cat_separate (cat: string) {
-    let sofar:string = "";
-    let ret:string[] = [];
-    for (var i = 0; i < cat.length; i++) {
-        if (cat[i] == ';') {
-            ret.push(sofar);
-            sofar = "";
-        } else {
-            sofar = sofar + cat[i];
-        }
-    }
-    ret.push(sofar);
-    console.log(cat)
-    console.log(ret)
-    return ret;
-}
+// function cat_separate (cat: string) {
+//     let sofar:string = "";
+//     let ret:string[] = [];
+//     for (var i = 0; i < cat.length; i++) {
+//         if (cat[i] === ';') {
+//             ret.push(sofar);
+//             sofar = "";
+//         } else {
+//             sofar = sofar + cat[i];
+//         }
+//     }
+//     ret.push(sofar);
+//     console.log(cat)
+//     console.log(ret)
+//     return ret;
+// }
 
 export function TaskTable(){
+    var headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    headers.append('Accept', 'application/json'); 
+
     const curTable = useAppSelector((state) => state.taskTable.tasks);
     let inputs:string[] = ["","","",""];
-    const tableInputs = selectTableInput;
     const dispatch = useDispatch()
     const inputChange = (event: any, index: number) => {
         const val = event.target.value;
@@ -63,46 +66,12 @@ export function TaskTable(){
                     </Button>
                 </ButtonGroup>
             </div>
-            <div className="d-grid gap-2">
-                <ButtonGroup>
-
-                </ButtonGroup>
-                <Button variant="primary" size="lg" onClick= {async () => {
-                    var headers = new Headers();
-                    headers.append('Content-Type', 'application/json');
-                    headers.append('Accept', 'application/json');  
-                    await fetch(url + "/tasks/add-task", {
-                        method: "POST",
-                        headers: headers,
-                        redirect: 'follow',
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            task_name: inputs[0],
-                            time_estimate: inputs[1],
-                            categories: cat_separate(inputs[2]),
-                            expiration_date: inputs[3]
-                        })
-                    }).then(async(res) => {
-                        const id = await res.text();
-                        const new_task:taskState = {
-                            task_id: parseInt(id),
-                            task_name: inputs[0],
-                            time_estimate: parseInt(inputs[1]),
-                            categories: cat_separate(inputs[2]),
-                            expiration_date: new Date(parseInt(inputs[3]))
-                        }
-                        dispatch(createRow(new_task));
-                    })
-                }}>
-                    Submit New Task
-                 </Button>
-            </div>
-            <Table bordered hover responsive>
+            <Table bordered hover responsive variant="dark">
                 <thead>
                     <tr>
                         <th className="text-center">Name</th>
                         <th className="text-center">Time Estimate</th>
-                        <th className="text-center">Categories</th>
+                        <th className="text-center">Category</th>
                         <th className="text-center">Expires</th>
                     </tr>
                 </thead>
@@ -121,13 +90,56 @@ export function TaskTable(){
                         <td><input id="i_expiration" name="expiration" type="text" onChange= {
                             e => {inputChange(e, 3); }
                         }/></td>
+                        <Button onClick= {async () => {
+                     
+                     await fetch(url + "/tasks/add-task", {
+                         method: "POST",
+                         headers: headers,
+                         redirect: 'follow',
+                         credentials: 'include',
+                         body: JSON.stringify({
+                             task_name: inputs[0],
+                             time_estimate: inputs[1],
+                             category: inputs[2],
+                             expiration_date: inputs[3]
+                         })
+                     }).then(async(res) => {
+                         const id = await res.text();
+                         const new_task:taskState = {
+                             task_id: parseInt(id),
+                             task_name: inputs[0],
+                             time_estimate: parseInt(inputs[1]),
+                             category: inputs[2],
+                             expiration_date: new Date(inputs[3]), 
+                         }
+                         dispatch(createRow(new_task));
+                     })
+                 }}>
+                     Submit New Task
+                  </Button>
                     </tr>
                     {curTable.map((item:taskState, idx: number) => (
                         <tr id="addr0" key={item.task_id}>
+                            
                             <td className="text-center">{curTable[idx].task_name}</td>
-                            <td className="text-center">{curTable[idx].time_estimate}</td>
-                            <td className="text-center">{curTable[idx].categories}</td>
+                            <td className="text-center">{curTable[idx].time_estimate + ' mins'}</td>
+                            <td className="text-center">{curTable[idx].category}</td>
                             <td className="text-center">{curTable[idx].expiration_date.toString()}</td>
+                            <a className='trash-icon' onClick={async (state) => {
+                                await fetch(url + "/tasks/remove-task", {
+                                    method: "POST",
+                                    headers: headers,
+                                    redirect: 'follow',
+                                    credentials: 'include',
+                                    body: JSON.stringify({
+                                        task_id: curTable[idx].task_id
+                                    })
+                                }).then(() => {
+                                    dispatch(removeRow(idx))
+                                }).catch(() => {
+                                    console.log("Could not Delete.");
+                                })
+                            }}>{'🗑'}</a>
                         </tr>
                     ))}
                 </tbody>

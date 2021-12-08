@@ -30,6 +30,11 @@
   font-family:Arial, Helvetica, sans-serif;
 }
 
+.trash-icon {
+  text-align: left;
+  padding:10px;
+}
+
 .App-link {
   color: #61dafb;
 }

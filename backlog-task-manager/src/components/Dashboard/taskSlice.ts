@@ -5,7 +5,7 @@ interface taskState {
     task_id: number,
     user_id?: string,   // not sure if needed
     task_name: string,
-    categories: string[],
+    category: string,
     time_estimate: number,
     expiration_date: Date
 }
@@ -13,7 +13,7 @@ interface taskState {
 const initialState: taskState = {
     task_id: -1,
     task_name: "N/A",
-    categories: [],
+    category: "",
     time_estimate: -1,
     expiration_date: new Date(Date.now())
 }
@@ -25,12 +25,8 @@ export const taskSlice = createSlice({
         changeName: (state, action: PayloadAction<string>) => {
             state.task_name = action.payload;
         },
-        addCategory: (state, action: PayloadAction<string>) => {
-            state.categories.push(action.payload);
-        },
-        removeCategory: (state, action: PayloadAction<string>) => {
-            const index = state.categories.indexOf(action.payload);
-            if (index > -1) state.categories.splice(index, 1);  // remove entry at index
+        setCategory: (state, action: PayloadAction<string>) => {
+            state.category = action.payload;
         },
         changeTimeEstimate: (state, action: PayloadAction<number>) => {
             state.time_estimate = action.payload;
@@ -42,6 +38,6 @@ export const taskSlice = createSlice({
 })
 
 export type {taskState};
-export const {changeName, addCategory, removeCategory, changeTimeEstimate, changeExpirationDate} = taskSlice.actions;
+export const {changeName, changeTimeEstimate, changeExpirationDate} = taskSlice.actions;
 export const selectTask = (state: RootState) => state.task
 export default taskSlice.reducer;

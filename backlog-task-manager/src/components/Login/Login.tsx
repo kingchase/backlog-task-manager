@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import { each } from "@reduxjs/toolkit/node_modules/immer/dist/internal";
 import { useDispatch } from "react-redux";
 import { taskState } from "../Dashboard/taskSlice";
-import { createRow } from "../Dashboard/TaskTable/taskTableSlice";
+import { clearTable, createRow } from "../Dashboard/TaskTable/taskTableSlice";
 
 const clientId = '214020505514-s9af0de9brcqal7edqstfidt61sgo9gk.apps.googleusercontent.com'
 
@@ -46,14 +46,17 @@ export default function Login() {
                 redirect: 'follow',
                 credentials: 'include'
             }).then(async (tasksres) => {
+                dispatch(clearTable());
                 await tasksres.text().then((txt) => {
                     const {tasks} = JSON.parse(txt);
                     console.log(tasks);
-                    tasks.forEach((element:taskState) => {
+                    tasks.forEach((element:any) => {
+                        const {category} = element
+                        const {category_name} = category||{category_name: ''}
                         const new_task:taskState = {
                             task_id: element.task_id,
                             task_name: element.task_name,
-                            categories: element.categories,
+                            category: category_name,
                             time_estimate: element.time_estimate,
                             expiration_date: new Date(element.expiration_date),
                         };

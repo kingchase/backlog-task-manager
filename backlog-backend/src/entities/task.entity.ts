@@ -1,9 +1,9 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Category } from "./category.entity";
 import { User } from "./user.entity";
 
 @Entity()
-export class Task {
+export class Task extends BaseEntity{
     @PrimaryGeneratedColumn()
     task_id: number;
 
@@ -13,17 +13,17 @@ export class Task {
     @Column({nullable: false})
     task_name: string;
 
-    @ManyToMany(() => Category, category => category.tasks)
-    @JoinTable()
-    categories: Category[];
-
     @Column()
     time_estimate: number; // Stored in minutes
 
     @Column()
     expiration_date: Date;
 
-    // @Column()
-    // priority: number
+    @ManyToOne(() => Category, category => category.tasks)
+    category: Category;
+
+    setCategory(cat: Category) {
+        this.category = cat;
+    }
 
 }

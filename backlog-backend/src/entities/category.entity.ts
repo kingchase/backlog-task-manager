@@ -1,14 +1,15 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable, BaseEntity, JoinColumn, OneToMany } from "typeorm";
 import { Task } from "./task.entity";
 
 @Entity()
-export class Category {
+export class Category extends BaseEntity{
     @PrimaryGeneratedColumn()
+    @JoinColumn()
     category_id: number;
 
     @Column()
     category_name: string;
 
-    @ManyToMany(() => Task, task => task.categories)
+    @OneToMany(() => Task, task => task.category)
     tasks: Task[]
 }
